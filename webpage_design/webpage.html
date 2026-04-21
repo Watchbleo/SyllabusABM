@@ -244,7 +244,7 @@ Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapi
                 </select>
             </div>
 
-            <button class="buy-btn">Buy Now</button>
+            <button class="buy-btn" onclick="buyNow()">Buy Now</button>
         </div>
 
     </div>
@@ -260,6 +260,7 @@ Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapi
         hardcover: 24.99,
         paperback: 14.99
     };
+    const GST_RATE = 0.05; // 5% GST (Canada)
 
     function updatePrices() {
         document.getElementById("kindle").innerText = "$" + prices.kindle.toFixed(2);
@@ -267,13 +268,29 @@ Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapi
         document.getElementById("paperback").innerText = "$" + prices.paperback.toFixed(2);
     }
 
+
     function selectFormat(format, element) {
-        document.getElementById("finalPrice").innerText = prices[format].toFixed(2);
+    const basePrice = prices[format];
 
-        document.querySelectorAll(".price-option").forEach(el => el.classList.remove("active"));
-        element.classList.add("active");
-    }
+    updateFinalPrice(basePrice);
 
+    document.querySelectorAll(".price-option")
+        .forEach(el => el.classList.remove("active"));
+
+    element.classList.add("active");
+
+    // store selected format for checkout
+    window.selectedFormat = format;
+}
+
+    function updateFinalPrice(basePrice) {
+    const gst = basePrice * GST_RATE;
+    const total = basePrice + gst;
+
+    document.getElementById("finalPrice").innerText = total.toFixed(2);
+
+    return { basePrice, gst, total };
+}
     // DELIVERY LOGIC
     function checkDelivery() {
         const code = document.getElementById("postalCode").value.trim().toUpperCase();
@@ -302,6 +319,33 @@ Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapi
         updatePrices();
         document.getElementById("finalPrice").innerText = prices.kindle.toFixed(2);
     }
+
+    function buyNow() {
+    const postal = document.getElementById("postalCode").value.trim();
+
+    if (!postal) {
+        alert("Please enter postal code before checkout.");
+        return;
+    }
+
+    const format = window.selectedFormat || "kindle";
+    const basePrice = prices[format];
+
+    const gst = basePrice * GST_RATE;
+    const total = basePrice + gst;
+
+    const delivery = document.getElementById("deliveryResult").innerText || "Delivery not checked";
+
+    // Fill UI summary
+    document.getElementById("summaryFormat").innerText = "Format: " + format;
+    document.getElementById("summaryBase").innerText = "Base Price: $" + basePrice.toFixed(2);
+    document.getElementById("summaryGST").innerText = "GST (5%): $" + gst.toFixed(2);
+    document.getElementById("summaryTotal").innerText = "TOTAL: $" + total.toFixed(2);
+    document.getElementById("summaryDelivery").innerText = delivery;
+
+    // Show modal
+    document.getElementById("orderSummary").style.display = "block";
+}
 
     // INIT
     updatePrices(10);
@@ -350,5 +394,22 @@ function moveLens(e) {
         `-${x * zoom}px -${y * zoom}px`;
 }
 </script>
+<div id="orderSummary" style="display:none; position:fixed; top:50%; left:50%; 
+transform:translate(-50%, -50%); background:#fff; padding:20px; 
+border:1px solid #ccc; width:320px; box-shadow:0 10px 30px rgba(0,0,0,0.3); z-index:9999;">
+
+    <h2>🧾 Order Summary</h2>
+    <p id="summaryFormat"></p>
+    <p id="summaryBase"></p>
+    <p id="summaryGST"></p>
+    <hr>
+    <p id="summaryTotal" style="font-size:18px; font-weight:bold;"></p>
+    <p id="summaryDelivery"></p>
+
+    <button onclick="closeSummary()" 
+        style="margin-top:10px; width:100%; padding:10px; background:#131921; color:#fff; border:none;">
+        Close
+    </button>
+</div>
 </body>
 </html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book Product Page</title>
+
+<style>
+    * { box-sizing: border-box; }
+
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f5f5f5;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    .top-header {
+        background: #131921;
+        color: #fff;
+        padding: 15px 30px;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .container {
+        flex: 1;
+        max-width: 1200px;
+        margin: auto;
+        padding: 20px;
+        background: #fff;
+    }
+
+    .header {
+        display: flex;
+        gap: 30px;
+    }
+
+    .book-image img {
+        width: 220px;
+    }
+
+    .book-info { flex: 2; }
+
+    .pricing {
+        flex: 1;
+        background: #fafafa;
+        padding: 20px;
+        border: 1px solid #ddd;
+    }
+
+    .price-option {
+        margin-bottom: 10px;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 5px;
+    }
+
+    .active {
+        border: 2px solid #ff9900;
+        background: #fff3e0;
+    }
+
+    .price {
+        color: #b12704;
+        font-weight: bold;
+    }
+
+    .final-price {
+        margin-top: 20px;
+        border-top: 2px solid #ddd;
+        padding-top: 10px;
+        font-size: 20px;
+        font-weight: bold;
+    }
+
+    .delivery {
+        margin-top: 15px;
+    }
+
+    .delivery input, .delivery select {
+        width: 100%;
+        padding: 8px;
+        margin-top: 5px;
+    }
+
+    .check-btn {
+        margin-top: 8px;
+        width: 100%;
+        padding: 8px;
+        background: #007185;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 4px;
+    }
+
+    .delivery-result {
+        margin-top: 10px;
+        font-size: 14px;
+        color: #007600;
+        font-weight: bold;
+    }
+
+    .buy-btn {
+        margin-top: 15px;
+        width: 100%;
+        padding: 10px;
+        background: #ff9900;
+        border: none;
+        font-weight: bold;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    footer {
+        text-align: center;
+        padding: 15px;
+        background: #222;
+        color: #fff;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="top-header">
+    <div>📚 BookStore</div>
+    <div>Home | Shop | Cart</div>
+</div>
+
+<div class="container">
+    <div class="header">
+        
+        <!-- LEFT -->
+        <div class="book-image">
+            <img src="./images/book-cover-page-design.jpeg" alt="Book Cover" >
+        </div>
+
+        <!-- MIDDLE -->
+        <div class="book-info">
+            <h1>The Great Book Title</h1>
+            <p><strong>Author:</strong> John Doe</p>
+            <p>Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.
+
+Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.
+
+Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.</p>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="pricing">
+
+            <div class="price-option active" onclick="selectFormat('kindle', this)">
+                <h3>Kindle Edition</h3>
+                <div class="price" id="kindle"></div>
+            </div>
+
+            <div class="price-option" onclick="selectFormat('hardcover', this)">
+                <h3>Hardcover</h3>
+                <div class="price" id="hardcover"></div>
+            </div>
+
+            <div class="price-option" onclick="selectFormat('paperback', this)">
+                <h3>Paperback</h3>
+                <div class="price" id="paperback"></div>
+            </div>
+
+            <div class="final-price">
+                Final Price: $<span id="finalPrice"></span>
+            </div>
+
+            <!-- DELIVERY SECTION -->
+            <div class="delivery">
+                <label>Enter Postal Code:</label>
+                <input type="text" id="postalCode" placeholder="e.g. T5A 0A1">
+
+                <button class="check-btn" onclick="checkDelivery()">Check Delivery</button>
+
+                <div class="delivery-result" id="deliveryResult"></div>
+
+                <label>Delivery Option:</label>
+                <select>
+                    <option>Standard (5-7 days)</option>
+                    <option>Express (2-3 days)</option>
+                </select>
+            </div>
+
+            <button class="buy-btn">Buy Now</button>
+        </div>
+
+    </div>
+</div>
+
+<footer>
+    &copy; 2026 BookStore
+</footer>
+
+<script>
+    const prices = {
+        kindle: 9.99,
+        hardcover: 24.99,
+        paperback: 14.99
+    };
+
+    function updatePrices() {
+        document.getElementById("kindle").innerText = "$" + prices.kindle.toFixed(2);
+        document.getElementById("hardcover").innerText = "$" + prices.hardcover.toFixed(2);
+        document.getElementById("paperback").innerText = "$" + prices.paperback.toFixed(2);
+    }
+
+    function selectFormat(format, element) {
+        document.getElementById("finalPrice").innerText = prices[format].toFixed(2);
+
+        document.querySelectorAll(".price-option").forEach(el => el.classList.remove("active"));
+        element.classList.add("active");
+    }
+
+    // DELIVERY LOGIC
+    function checkDelivery() {
+        const code = document.getElementById("postalCode").value.trim().toUpperCase();
+        let result = "";
+
+        if (!code) {
+            result = "Please enter a postal code.";
+        } 
+        else if (code.startsWith("T")) {
+            result = "Delivery in 2-3 days (local area).";
+        } 
+        else if (code.startsWith("V") || code.startsWith("M")) {
+            result = "Delivery in 3-5 days.";
+        } 
+        else {
+            result = "Delivery in 5-7 days.";
+        }
+
+        document.getElementById("deliveryResult").innerText = result;
+    }
+
+    function applyDiscount(percent) {
+        for (let key in prices) {
+            prices[key] *= (1 - percent / 100);
+        }
+        updatePrices();
+        document.getElementById("finalPrice").innerText = prices.kindle.toFixed(2);
+    }
+
+    // INIT
+    updatePrices();
+    selectFormat('kindle', document.querySelector('.price-option'));
+</script>
+
+</body>
+</html>

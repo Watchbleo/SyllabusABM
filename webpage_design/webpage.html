@@ -39,7 +39,11 @@
     }
 
     .book-image img {
-        width: 220px;
+        width: 300px;
+        height: 400px;
+        overflow: hidden;
+        border-radius: 8px;
+        cursor: zoom-in;
     }
 
     .book-info { flex: 2; }
@@ -121,6 +125,54 @@
         background: #222;
         color: #fff;
     }
+
+    /* ===== AMAZON STYLE ZOOM ===== */
+
+.image-zoom-wrapper {
+    position: relative;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.book-image {
+    position: relative;
+}
+
+.book-image img {
+    width: 300px;
+    height: 400px;
+    display: block;
+    cursor: zoom-in;
+}
+
+/* Lens box */
+.lens {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    border: 2px solid #000;
+    background: rgba(255,255,255,0.3);
+    display: none;
+    pointer-events: none;
+}
+
+/* Zoom result panel */
+.zoom-result {
+    position: absolute;
+    left: 330px;   /* sits over middle section */
+    top: 0;
+    width: 450px;
+    height: 400px;
+
+    border: 1px solid #ddd;
+    background-repeat: no-repeat;
+    background-color: #fff;
+
+    display: none;
+    z-index: 999;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
 </style>
 </head>
 
@@ -134,11 +186,15 @@
 <div class="container">
     <div class="header">
         
-        <!-- LEFT -->
-        <div class="book-image">
-            <img src="./images/book-cover-page-design.jpeg" alt="Book Cover" >
-        </div>
+       <!-- LEFT -->
+<div class="image-zoom-wrapper">
+    <div class="book-image" id="imgBox">
+        <img src="./images/book-cover-page-design.jpeg" id="bookImg" alt="Book Cover">
+        <div class="lens" id="lens"></div>
+    </div>
 
+    <div class="zoom-result" id="zoomResult"></div>
+</div>
         <!-- MIDDLE -->
         <div class="book-info">
             <h1>The Great Book Title</h1>
@@ -248,9 +304,51 @@ Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapi
     }
 
     // INIT
-    updatePrices();
+    updatePrices(10);
     selectFormat('kindle', document.querySelector('.price-option'));
 </script>
+<script>
+const img = document.getElementById("bookImg");
+const lens = document.getElementById("lens");
+const result = document.getElementById("zoomResult");
 
+const zoom = 3;
+
+result.style.backgroundImage = `url(${img.src})`;
+
+img.addEventListener("mouseenter", () => {
+    lens.style.display = "block";
+    result.style.display = "block";
+});
+
+img.addEventListener("mouseleave", () => {
+    lens.style.display = "none";
+    result.style.display = "none";
+});
+
+img.addEventListener("mousemove", moveLens);
+
+function moveLens(e) {
+    const rect = img.getBoundingClientRect();
+
+    let x = e.clientX - rect.left - lens.offsetWidth / 2;
+    let y = e.clientY - rect.top - lens.offsetHeight / 2;
+
+    if (x < 0) x = 0;
+    if (y < 0) y = 0;
+    if (x > img.width - lens.offsetWidth) x = img.width - lens.offsetWidth;
+    if (y > img.height - lens.offsetHeight) y = img.height - lens.offsetHeight;
+
+    lens.style.left = x + "px";
+    lens.style.top = y + "px";
+
+    result.style.backgroundSize =
+        img.width * zoom + "px " +
+        img.height * zoom + "px";
+
+    result.style.backgroundPosition =
+        `-${x * zoom}px -${y * zoom}px`;
+}
+</script>
 </body>
 </html>

@@ -3,180 +3,240 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Modern Calculator</title>
+<title>Calculator App</title>
 
 <style>
-* {
-  box-sizing: border-box;
-  font-family: 'Segoe UI', sans-serif;
-}
+* { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
 
 body {
   margin: 0;
-  height: 100vh;
   background: linear-gradient(135deg, #1f1c2c, #928dab);
+  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* Glass container */
-.calculator {
+/* Sidebar */
+.sidebar {
+  position: fixed;
+  left: -250px;
+  top: 0;
+  width: 250px;
+  height: 100%;
+  background: #222;
+  color: white;
+  padding: 20px;
+  transition: 0.3s;
+}
+
+.sidebar.open { left: 0; }
+
+.sidebar button {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: none;
+  background: #444;
+  color: white;
+  cursor: pointer;
+}
+
+/* Main container */
+.app {
   width: 100%;
   max-width: 380px;
   padding: 20px;
   border-radius: 20px;
+  background: rgba(255,255,255,0.08);
   backdrop-filter: blur(15px);
-  background: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
 }
+
+/* Topbar */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  color: white;
+  margin-bottom: 10px;
+}
+
+.menu-btn { cursor: pointer; font-size: 1.5rem; }
 
 /* Display */
 .display {
   width: 100%;
   height: 70px;
+  font-size: 1.6rem;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 10px;
   border: none;
-  border-radius: 12px;
-  padding: 15px;
-  font-size: 1.8rem;
   text-align: right;
-  margin-bottom: 15px;
-  background: rgba(255,255,255,0.15);
-  color: white;
-  outline: none;
 }
 
-/* Grid */
+/* Buttons */
 .buttons {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 10px;
 }
 
-/* Buttons */
 button {
-  border: none;
-  border-radius: 12px;
   padding: 15px;
-  font-size: 1rem;
-  cursor: pointer;
+  border-radius: 10px;
+  border: none;
   color: white;
   background: rgba(255,255,255,0.1);
-  backdrop-filter: blur(5px);
-  transition: all 0.15s ease;
 }
 
-/* Hover + press */
-button:hover {
-  background: rgba(255,255,255,0.2);
+.operator { background: #f39c12; }
+.func { background: #9b59b6; }
+.equal { grid-column: span 2; background: #2ecc71; }
+.clear { background: #e74c3c; }
+
+/* Converter */
+.converter {
+  display: none;
+  color: white;
 }
 
-button:active {
-  transform: scale(0.92);
+.converter.active { display: block; }
+
+.converter input, .converter select {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 8px;
+  border: none;
 }
 
-/* Special styles */
-.operator {
-  background: linear-gradient(135deg, #ff9a9e, #fad0c4);
-  color: #222;
-}
-
-.func {
-  background: linear-gradient(135deg, #a18cd1, #fbc2eb);
-  color: #222;
-}
-
-.equal {
-  grid-column: span 2;
-  background: linear-gradient(135deg, #43e97b, #38f9d7);
-  color: #222;
-}
-
-.clear {
-  background: linear-gradient(135deg, #ff6a6a, #ffb199);
-  color: #222;
-}
-
-/* Mobile tweak */
-@media (max-width: 400px) {
-  .display {
-    font-size: 1.4rem;
-  }
-  button {
-    padding: 12px;
-    font-size: 0.9rem;
-  }
+.result {
+  margin-top: 10px;
+  font-size: 1.2rem;
 }
 </style>
 </head>
 
 <body>
 
-<div class="calculator">
-  <input type="text" id="display" class="display" disabled>
+<div class="sidebar" id="sidebar">
+  <h3>Modes</h3>
+  <button onclick="setMode('calc')">Calculator</button>
+  <button onclick="setMode('convert')">Converter</button>
+</div>
 
-  <div class="buttons">
-    <!-- Functions -->
-    <button class="func" onclick="append('Math.sin(')">sin</button>
-    <button class="func" onclick="append('Math.cos(')">cos</button>
-    <button class="func" onclick="append('Math.tan(')">tan</button>
-    <button class="func" onclick="append('Math.log10(')">log</button>
-    <button class="func" onclick="append('Math.log(')">ln</button>
+<div class="app">
+  <div class="topbar">
+    <span class="menu-btn" onclick="toggleMenu()">☰</span>
+    <span id="title">Calculator</span>
+  </div>
 
-    <button class="func" onclick="append('Math.sqrt(')">√</button>
-    <button class="func" onclick="append('**2')">x²</button>
-    <button class="func" onclick="append('Math.PI')">π</button>
-    <button class="func" onclick="append('Math.E')">e</button>
-    <button onclick="append('(')">(</button>
+  <!-- Calculator -->
+  <div id="calculatorMode">
+    <input type="text" id="display" class="display" disabled>
 
-    <button onclick="append(')')">)</button>
-    <button class="clear" onclick="clearDisplay()">C</button>
-    <button onclick="backspace()">⌫</button>
-    <button class="operator" onclick="append('/')">÷</button>
-    <button class="operator" onclick="append('*')">×</button>
+    <div class="buttons">
+      <button class="func" onclick="append('Math.sin(')">sin</button>
+      <button class="func" onclick="append('Math.cos(')">cos</button>
+      <button class="func" onclick="append('Math.tan(')">tan</button>
+      <button class="func" onclick="append('Math.log10(')">log</button>
+      <button class="func" onclick="append('Math.log(')">ln</button>
 
-    <!-- Numbers -->
-    <button onclick="append('7')">7</button>
-    <button onclick="append('8')">8</button>
-    <button onclick="append('9')">9</button>
-    <button class="operator" onclick="append('-')">−</button>
-    <button class="operator" onclick="append('+')">+</button>
+      <button class="func" onclick="append('Math.sqrt(')">√</button>
+      <button class="func" onclick="append('**2')">x²</button>
+      <button class="func" onclick="append('Math.PI')">π</button>
+      <button class="func" onclick="append('Math.E')">e</button>
+      <button onclick="append('(')">(</button>
 
-    <button onclick="append('4')">4</button>
-    <button onclick="append('5')">5</button>
-    <button onclick="append('6')">6</button>
-    <button onclick="append('1')">1</button>
-    <button onclick="append('2')">2</button>
+      <button onclick="append(')')">)</button>
+      <button class="clear" onclick="clearDisplay()">C</button>
+      <button onclick="backspace()">⌫</button>
+      <button class="operator" onclick="append('/')">÷</button>
+      <button class="operator" onclick="append('*')">×</button>
 
-    <button onclick="append('3')">3</button>
-    <button onclick="append('0')">0</button>
-    <button onclick="append('.')">.</button>
-    <button class="equal" onclick="calculate()">=</button>
+      <button onclick="append('7')">7</button>
+      <button onclick="append('8')">8</button>
+      <button onclick="append('9')">9</button>
+      <button class="operator" onclick="append('-')">−</button>
+      <button class="operator" onclick="append('+')">+</button>
+
+      <button onclick="append('4')">4</button>
+      <button onclick="append('5')">5</button>
+      <button onclick="append('6')">6</button>
+      <button onclick="append('1')">1</button>
+      <button onclick="append('2')">2</button>
+
+      <button onclick="append('3')">3</button>
+      <button onclick="append('0')">0</button>
+      <button onclick="append('.')">.</button>
+      <button class="equal" onclick="calculate()">=</button>
+    </div>
+  </div>
+
+  <!-- Converter -->
+  <div id="converterMode" class="converter">
+    <input type="number" id="convInput" placeholder="Enter value">
+
+    <select id="convType">
+      <option value="lbkg">Pounds → Kilograms</option>
+      <option value="kglb">Kilograms → Pounds</option>
+    </select>
+
+    <button onclick="convert()">Convert</button>
+
+    <div class="result" id="convResult"></div>
   </div>
 </div>
 
 <script>
-function append(value) {
-  document.getElementById("display").value += value;
+function toggleMenu() {
+  document.getElementById("sidebar").classList.toggle("open");
 }
 
-function clearDisplay() {
-  document.getElementById("display").value = "";
-}
+function setMode(mode) {
+  document.getElementById("sidebar").classList.remove("open");
 
-function backspace() {
-  let d = document.getElementById("display");
-  d.value = d.value.slice(0, -1);
-}
-
-function calculate() {
-  try {
-    let exp = document.getElementById("display").value;
-    let result = Function('"use strict";return (' + exp + ')')();
-    document.getElementById("display").value = result;
-  } catch {
-    document.getElementById("display").value = "Error";
+  if (mode === 'calc') {
+    document.getElementById("calculatorMode").style.display = "block";
+    document.getElementById("converterMode").classList.remove("active");
+    document.getElementById("title").innerText = "Calculator";
+  } else {
+    document.getElementById("calculatorMode").style.display = "none";
+    document.getElementById("converterMode").classList.add("active");
+    document.getElementById("title").innerText = "Converter";
   }
+}
+
+/* Calculator */
+function append(v){ document.getElementById("display").value += v; }
+function clearDisplay(){ document.getElementById("display").value=""; }
+function backspace(){
+  let d=document.getElementById("display");
+  d.value=d.value.slice(0,-1);
+}
+function calculate(){
+  try{
+    let exp=document.getElementById("display").value;
+    document.getElementById("display").value =
+      Function('"use strict";return ('+exp+')')();
+  }catch{
+    document.getElementById("display").value="Error";
+  }
+}
+
+/* Converter */
+function convert(){
+  let val = parseFloat(document.getElementById("convInput").value);
+  let type = document.getElementById("convType").value;
+
+  if (isNaN(val)) return;
+
+  let result;
+
+  if (type === "lbkg") result = val * 0.453592;
+  if (type === "kglb") result = val / 0.453592;
+
+  document.getElementById("convResult").innerText = result.toFixed(4);
 }
 </script>
 

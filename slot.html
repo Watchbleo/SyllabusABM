@@ -117,6 +117,8 @@
     </div>
 
     <div class="status" id="statusText">Press Start to Spin</div>
+    <div class="status" id="spinCount">Spins Used: 0</div>
+    <div class="status" id="totalPoints">Total Points Earned: 0 pts</div>
   </div>
 
   <script>
@@ -124,6 +126,8 @@
 
     let spinning = false;
     let spinInterval;
+    let playerScore = 0;
+    let spinsUsed = 0;
 
     function getRandomSymbol() {
       return symbols[Math.floor(Math.random() * symbols.length)];
@@ -147,16 +151,48 @@
 
       clearInterval(spinInterval);
       spinning = false;
+      spinsUsed++;
 
-      const slot1 = document.getElementById('slot1').textContent;
-      const slot2 = document.getElementById('slot2').textContent;
-      const slot3 = document.getElementById('slot3').textContent;
+      let slot1 = document.getElementById('slot1').textContent;
+      let slot2 = document.getElementById('slot2').textContent;
+      let slot3 = document.getElementById('slot3').textContent;
+
+      // Guarantee reward within 5 spins
+      if (spinsUsed === 5 && playerScore === 0) {
+        const rewardType = Math.random() < 0.5 ? 'double' : 'triple';
+
+        if (rewardType === 'triple') {
+          const forcedNumber = getRandomSymbol();
+          slot1 = slot2 = slot3 = forcedNumber;
+          document.getElementById('slot1').textContent = forcedNumber;
+          document.getElementById('slot2').textContent = forcedNumber;
+          document.getElementById('slot3').textContent = forcedNumber;
+        } else {
+          const forcedNumber = getRandomSymbol();
+          const differentNumber = getRandomSymbol();
+
+          slot1 = forcedNumber;
+          slot2 = forcedNumber;
+          slot3 = differentNumber;
+
+          document.getElementById('slot1').textContent = slot1;
+          document.getElementById('slot2').textContent = slot2;
+          document.getElementById('slot3').textContent = slot3;
+        }
+      }
 
       if (slot1 === slot2 && slot2 === slot3) {
-        document.getElementById('statusText').textContent = '🎉 Jackpot! You matched all 3!';
+        playerScore += 100;
+        document.getElementById('statusText').textContent = '🎉 Jackpot! Player 1 earned 100 pts';
+      } else if (slot1 === slot2 || slot1 === slot3 || slot2 === slot3) {
+        playerScore += 50;
+        document.getElementById('statusText').textContent = '✨ Match! Player 1 earned 50 pts';
       } else {
-        document.getElementById('statusText').textContent = 'Try Again!';
+        document.getElementById('statusText').textContent = 'No Match — 0 pts';
       }
+
+      document.getElementById('spinCount').textContent = `Spins Used: ${spinsUsed}`;
+      document.getElementById('totalPoints').textContent = `Total Points Earned: ${playerScore} pts`;
     }
   </script>
 

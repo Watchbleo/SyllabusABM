@@ -3,26 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calculator App</title>
+<title>Calculator App with History</title>
 
 <style>
-* { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+* {
+  box-sizing: border-box;
+  font-family: 'Segoe UI', sans-serif;
+}
 
 body {
   margin: 0;
+  min-height: 100vh;
   background: linear-gradient(135deg, #1f1c2c, #928dab);
-  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 20px;
 }
 
-/* Sidebar */
+/* SIDEBAR */
 .sidebar {
   position: fixed;
-  left: -250px;
+  left: -260px;
   top: 0;
-  width: 250px;
+  width: 260px;
   height: 100%;
   background: #222;
   color: white;
@@ -35,24 +39,25 @@ body {
 .sidebar button {
   width: 100%;
   padding: 12px;
-  margin: 10px 0;
+  margin: 8px 0;
   border: none;
+  border-radius: 8px;
   background: #444;
   color: white;
   cursor: pointer;
 }
 
-/* Main container */
+/* APP */
 .app {
-  width: 100%;
-  max-width: 380px;
+  width: min(95vw, 520px);
   padding: 20px;
   border-radius: 20px;
   background: rgba(255,255,255,0.08);
   backdrop-filter: blur(15px);
+  box-shadow: 0 10px 35px rgba(0,0,0,0.4);
 }
 
-/* Topbar */
+/* TOP BAR */
 .topbar {
   display: flex;
   justify-content: space-between;
@@ -60,21 +65,24 @@ body {
   margin-bottom: 10px;
 }
 
-.menu-btn { cursor: pointer; font-size: 1.5rem; }
-
-/* Display */
-.display {
-  width: 100%;
-  height: 70px;
-  font-size: 1.6rem;
-  padding: 10px;
-  border-radius: 10px;
-  margin-bottom: 10px;
-  border: none;
-  text-align: right;
+.menu-btn {
+  cursor: pointer;
+  font-size: 1.8rem;
 }
 
-/* Buttons */
+/* DISPLAY */
+.display {
+  width: 100%;
+  height: 80px;
+  border: none;
+  border-radius: 14px;
+  padding: 15px;
+  font-size: 1.6rem;
+  text-align: right;
+  margin-bottom: 10px;
+}
+
+/* BUTTONS */
 .buttons {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -82,19 +90,23 @@ body {
 }
 
 button {
-  padding: 15px;
-  border-radius: 10px;
   border: none;
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 1rem;
   color: white;
-  background: rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.12);
+  cursor: pointer;
 }
+
+button:active { transform: scale(0.95); }
 
 .operator { background: #f39c12; }
 .func { background: #9b59b6; }
 .equal { grid-column: span 2; background: #2ecc71; }
 .clear { background: #e74c3c; }
 
-/* Converter */
+/* CONVERTER */
 .converter {
   display: none;
   color: white;
@@ -102,36 +114,57 @@ button {
 
 .converter.active { display: block; }
 
-.converter input, .converter select {
+.converter input,
+.converter select {
   width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 8px;
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 10px;
   border: none;
+  font-size: 1rem;
 }
 
 .result {
   margin-top: 10px;
-  font-size: 1.2rem;
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+/* HISTORY */
+#historyBox {
+  display: none;
+  color: white;
+  margin-top: 10px;
+}
+
+#historyList {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  max-height: 200px;
+  overflow-y: auto;
 }
 </style>
 </head>
 
 <body>
 
+<!-- SIDEBAR -->
 <div class="sidebar" id="sidebar">
-  <h3>Modes</h3>
+  <h3>Menu</h3>
   <button onclick="setMode('calc')">Calculator</button>
   <button onclick="setMode('convert')">Converter</button>
+  <button onclick="showHistory()">History</button>
 </div>
 
+<!-- APP -->
 <div class="app">
+
   <div class="topbar">
     <span class="menu-btn" onclick="toggleMenu()">☰</span>
     <span id="title">Calculator</span>
   </div>
 
-  <!-- Calculator -->
+  <!-- CALCULATOR -->
   <div id="calculatorMode">
     <input type="text" id="display" class="display" disabled>
 
@@ -173,71 +206,147 @@ button {
     </div>
   </div>
 
-  <!-- Converter -->
+  <!-- CONVERTER -->
   <div id="converterMode" class="converter">
+
     <input type="number" id="convInput" placeholder="Enter value">
 
     <select id="convType">
       <option value="lbkg">Pounds → Kilograms</option>
       <option value="kglb">Kilograms → Pounds</option>
+      <option value="area">Square Feet → Area Units</option>
     </select>
 
     <button onclick="convert()">Convert</button>
 
     <div class="result" id="convResult"></div>
   </div>
+
+  <!-- HISTORY -->
+  <div id="historyBox">
+    <h3>History (Last 10)</h3>
+    <div id="historyList"></div>
+    <button onclick="clearHistory()" style="margin-top:10px; width:100%; padding:10px; border:none; border-radius:8px; background:#e74c3c; color:white;">
+      Clear History
+    </button>
+  </div>
+
 </div>
 
 <script>
+
+let history = [];
+
+/* MENU */
 function toggleMenu() {
   document.getElementById("sidebar").classList.toggle("open");
 }
 
+/* MODE SWITCH */
 function setMode(mode) {
   document.getElementById("sidebar").classList.remove("open");
 
-  if (mode === 'calc') {
+  document.getElementById("historyBox").style.display = "none";
+
+  if (mode === "calc") {
     document.getElementById("calculatorMode").style.display = "block";
     document.getElementById("converterMode").classList.remove("active");
     document.getElementById("title").innerText = "Calculator";
-  } else {
+  }
+
+  else if (mode === "convert") {
     document.getElementById("calculatorMode").style.display = "none";
     document.getElementById("converterMode").classList.add("active");
     document.getElementById("title").innerText = "Converter";
   }
 }
 
-/* Calculator */
-function append(v){ document.getElementById("display").value += v; }
-function clearDisplay(){ document.getElementById("display").value=""; }
-function backspace(){
-  let d=document.getElementById("display");
-  d.value=d.value.slice(0,-1);
+/* CALCULATOR */
+function append(v){
+  document.getElementById("display").value += v;
 }
+
+function clearDisplay(){
+  document.getElementById("display").value = "";
+}
+
+function backspace(){
+  let d = document.getElementById("display");
+  d.value = d.value.slice(0,-1);
+}
+
 function calculate(){
-  try{
-    let exp=document.getElementById("display").value;
-    document.getElementById("display").value =
-      Function('"use strict";return ('+exp+')')();
-  }catch{
-    document.getElementById("display").value="Error";
+  try {
+    let exp = document.getElementById("display").value;
+    let result = Function('"use strict";return (' + exp + ')')();
+
+    document.getElementById("display").value = result;
+
+    addHistory(exp + " = " + result);
+
+  } catch {
+    document.getElementById("display").value = "Error";
   }
 }
 
-/* Converter */
+/* HISTORY */
+function addHistory(item){
+  history.unshift(item);
+  if (history.length > 10) history.pop();
+  renderHistory();
+}
+
+function renderHistory(){
+  document.getElementById("historyList").innerHTML =
+    history.map(h => `<div>• ${h}</div>`).join("");
+}
+
+function showHistory(){
+  document.getElementById("sidebar").classList.remove("open");
+  let box = document.getElementById("historyBox");
+  box.style.display = (box.style.display === "block") ? "none" : "block";
+}
+
+function clearHistory(){
+  history = [];
+  renderHistory();
+}
+
+/* CONVERTER */
 function convert(){
   let val = parseFloat(document.getElementById("convInput").value);
   let type = document.getElementById("convType").value;
 
   if (isNaN(val)) return;
 
-  let result;
+  let output = "";
 
-  if (type === "lbkg") result = val * 0.453592;
-  if (type === "kglb") result = val / 0.453592;
+  if (type === "lbkg") {
+    output = (val * 0.453592).toFixed(4) + " kg";
+  }
 
-  document.getElementById("convResult").innerText = result.toFixed(4);
+  else if (type === "kglb") {
+    output = (val / 0.453592).toFixed(4) + " lb";
+  }
+
+  else if (type === "area") {
+    let m2 = val * 0.092903;
+    let yd2 = val * 0.111111;
+    let cm2 = val * 929.03;
+    let mm2 = val * 92903;
+    let in2 = val * 144;
+
+    output =
+      `${m2.toFixed(4)} m²\n` +
+      `${yd2.toFixed(4)} yd²\n` +
+      `${cm2.toFixed(2)} cm²\n` +
+      `${mm2.toFixed(2)} mm²\n` +
+      `${in2.toFixed(2)} in²`;
+  }
+
+  document.getElementById("convResult").innerHTML = output;
 }
+
 </script>
 
 </body>

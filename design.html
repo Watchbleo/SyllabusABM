@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>County Milk Brick Packaging Designer</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #cfe8ff, #f4fbff);
+      min-height: 100vh;
+      padding: 30px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #1d4e89;
+    }
+
+    .layout {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 40px;
+    }
+
+    .milk-brick {
+      display: flex;
+      gap: 6px;
+      align-items: stretch;
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+
+    .panel {
+      width: 220px;
+      background: white;
+      border: 2px dashed #b4d4f5;
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-header {
+      background: linear-gradient(135deg, #1d70b8, #4ea5ff);
+      color: white;
+      text-align: center;
+      padding: 15px;
+    }
+
+    .panel-header img {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: white;
+      padding: 8px;
+      margin-bottom: 8px;
+    }
+
+    .panel-content {
+      padding: 15px;
+      flex: 1;
+    }
+
+    .section {
+      margin-bottom: 15px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 10px;
+    }
+
+    .label {
+      font-weight: bold;
+      color: #1d70b8;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .value {
+      color: #333;
+      font-size: 14px;
+    }
+
+    .cartoon-milk {
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+
+    .controls {
+      width: 100%;
+      max-width: 900px;
+      background: white;
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+      margin: 30px auto 0;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    button {
+      background: #1d70b8;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #14578d;
+    }
+
+    .preview-box {
+      background: #eef7ff;
+      padding: 12px;
+      border-radius: 10px;
+      margin-top: 15px;
+      color: #333;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>County Milk Brick Packaging Designer</h1>
+
+  <div class="layout">
+
+    <div class="controls" style="max-width:320px; margin:0; align-self:flex-start;">
+      <h2>Edit Packaging Design</h2>
+      <p>Update the milk brick information from this left panel.</p>
+
+      <div style="display:flex; flex-direction:column; gap:10px; margin-top:15px;">
+        <input type="text" id="editCompanyName" placeholder="Company Name" style="padding:10px; border-radius:8px; border:1px solid #ccc;">
+        <input type="text" id="editProductName" placeholder="Product Name" style="padding:10px; border-radius:8px; border:1px solid #ccc;">
+        <input type="text" id="editTagline" placeholder="Tagline" style="padding:10px; border-radius:8px; border:1px solid #ccc;">
+        <textarea id="editIngredients" placeholder="Ingredients" style="padding:10px; border-radius:8px; border:1px solid #ccc; min-height:70px;"></textarea>
+        <input type="text" id="editNutrition" placeholder="Nutrition" style="padding:10px; border-radius:8px; border:1px solid #ccc;">
+        <input type="text" id="editLicense" placeholder="License Number" style="padding:10px; border-radius:8px; border:1px solid #ccc;">
+        <input type="text" id="editExpiry" placeholder="Expiry Date" style="padding:10px; border-radius:8px; border:1px solid #ccc;">
+        <input type="text" id="editVolume" placeholder="Volume" style="padding:10px; border-radius:8px; border:1px solid #ccc;">
+        <input type="text" id="editAddress" placeholder="Company Address" style="padding:10px; border-radius:8px; border:1px solid #ccc;">
+        <input type="text" id="editContact" placeholder="Contact Email" style="padding:10px; border-radius:8px; border:1px solid #ccc;">
+      </div>
+
+      <div class="buttons" style="flex-direction:column; margin-top:15px;">
+        <button onclick="openUpdatedDesign()">Open Updated Design in New Tab</button>
+        <button onclick="editPackaging()">Edit Packaging</button>
+        <button onclick="resetPackaging()">Reset Design</button>
+        <button onclick="showEditableFields()">Show Editable Fields</button>
+      </div>
+
+      <div class="preview-box">
+        <strong>Console Commands</strong><br><br>
+        updateMilkField('companyName', 'County Premium Milk')<br><br>
+        updateMilkField('ingredients', 'Organic Milk, Calcium, Vitamin B12')<br><br>
+        updateMilkField('expiry', '01 January 2030')
+      </div>
+    </div>
+    <div class="milk-brick">
+
+      <div class="panel">
+        <div class="panel-header">
+          <img src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png" alt="County Milk Logo">
+          <h2 id="companyName">County Milk</h2>
+          <p>Front Side</p>
+        </div>
+        <div class="panel-content">
+          <img class="cartoon-milk" src="https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&w=800&q=80" alt="Milk Cartoon">
+
+          <div class="section">
+            <span class="label">Product</span>
+            <span class="value" id="productName">Fresh Cartoon Milk</span>
+          </div>
+
+          <div class="section">
+            <span class="label">Tagline</span>
+            <span class="value" id="tagline">Healthy Milk for Every Family</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Ingredients Side</h2>
+        </div>
+        <div class="panel-content">
+          <div class="section">
+            <span class="label">Ingredients</span>
+            <span class="value" id="ingredients">Pure Milk, Vitamin D, Calcium, Protein</span>
+          </div>
+
+          <div class="section">
+            <span class="label">Nutrition</span>
+            <span class="value" id="nutrition">120 Calories, 8g Protein</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2>License & Expiry</h2>
+        </div>
+        <div class="panel-content">
+          <div class="section">
+            <span class="label">License Number</span>
+            <span class="value" id="license">CNTY-MILK-2026-001</span>
+          </div>
+
+          <div class="section">
+            <span class="label">Expiry Date</span>
+            <span class="value" id="expiry">20 July 2028</span>
+          </div>
+
+          <div class="section">
+            <span class="label">Volume</span>
+            <span class="value" id="volume">1 Liter</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Back Side</h2>
+        </div>
+        <div class="panel-content">
+          <div class="section">
+            <span class="label">Company Address</span>
+            <span class="value" id="address">County Milk Farms, Green Valley, USA</span>
+          </div>
+
+          <div class="section">
+            <span class="label">Contact</span>
+            <span class="value" id="contact">support@countymilk.com</span>
+          </div>
+
+          <div class="section">
+            <span class="label">Barcode</span>
+            <span class="value">1234-5678-COUNTY</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const defaults = {
+      companyName: 'County Milk',
+      productName: 'Fresh Cartoon Milk',
+      tagline: 'Healthy Milk for Every Family',
+      ingredients: 'Pure Milk, Vitamin D, Calcium, Protein',
+      nutrition: '120 Calories, 8g Protein',
+      license: 'CNTY-MILK-2026-001',
+      expiry: '20 July 2028',
+      volume: '1 Liter',
+      address: 'County Milk Farms, Green Valley, USA',
+      contact: 'support@countymilk.com'
+    };
+
+    function editPackaging() {
+      const fieldMap = {
+        companyName: 'editCompanyName',
+        productName: 'editProductName',
+        tagline: 'editTagline',
+        ingredients: 'editIngredients',
+        nutrition: 'editNutrition',
+        license: 'editLicense',
+        expiry: 'editExpiry',
+        volume: 'editVolume',
+        address: 'editAddress',
+        contact: 'editContact'
+      };
+
+      Object.keys(fieldMap).forEach(key => {
+        const input = document.getElementById(fieldMap[key]);
+        const target = document.getElementById(key);
+
+        if (input && target && input.value.trim() !== '') {
+          target.textContent = input.value;
+        }
+      });
+    }
+
+    function resetPackaging() {
+      Object.keys(defaults).forEach(key => {
+        const element = document.getElementById(key);
+        if (element) {
+          element.textContent = defaults[key];
+        }
+      });
+
+      document.querySelectorAll('.controls input, .controls textarea').forEach(field => {
+        field.value = '';
+      });
+    }
+
+    function populateEditPanel() {
+      document.getElementById('editCompanyName').value = document.getElementById('companyName').textContent;
+      document.getElementById('editProductName').value = document.getElementById('productName').textContent;
+      document.getElementById('editTagline').value = document.getElementById('tagline').textContent;
+      document.getElementById('editIngredients').value = document.getElementById('ingredients').textContent;
+      document.getElementById('editNutrition').value = document.getElementById('nutrition').textContent;
+      document.getElementById('editLicense').value = document.getElementById('license').textContent;
+      document.getElementById('editExpiry').value = document.getElementById('expiry').textContent;
+      document.getElementById('editVolume').value = document.getElementById('volume').textContent;
+      document.getElementById('editAddress').value = document.getElementById('address').textContent;
+      document.getElementById('editContact').value = document.getElementById('contact').textContent;
+    }
+
+    function updateMilkField(field, value) {
+      const element = document.getElementById(field);
+      if (element) {
+        element.textContent = value;
+        console.log(`${field} updated to: ${value}`);
+      }
+    }
+
+    function showEditableFields() {
+      console.table({
+        companyName: document.getElementById('companyName').textContent,
+        productName: document.getElementById('productName').textContent,
+        tagline: document.getElementById('tagline').textContent,
+        ingredients: document.getElementById('ingredients').textContent,
+        nutrition: document.getElementById('nutrition').textContent,
+        license: document.getElementById('license').textContent,
+        expiry: document.getElementById('expiry').textContent,
+        volume: document.getElementById('volume').textContent,
+        address: document.getElementById('address').textContent,
+        contact: document.getElementById('contact').textContent
+      });
+    }
+
+    function openUpdatedDesign() {
+      editPackaging();
+
+      const newWindow = window.open('', '_blank');
+      const designContent = document.querySelector('.milk-brick').outerHTML;
+
+      newWindow.document.write(`
+        <html>
+        <head>
+          <title>Updated County Milk Design</title>
+          <style>
+            body {
+              background: linear-gradient(135deg, #cfe8ff, #f4fbff);
+              padding: 30px;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              min-height: 100vh;
+              font-family: Arial, sans-serif;
+            }
+          </style>
+        </head>
+        <body>
+          ${designContent}
+        </body>
+        </html>
+      `);
+
+      newWindow.document.close();
+    }
+
+    window.onload = function() {
+      populateEditPanel();
+      console.log('County Milk Packaging Designer Ready');
+      console.log('Use the left panel to edit packaging information.');
+    };
+  </script>
+
+</body>
+</html>

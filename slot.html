@@ -98,11 +98,65 @@
       color: #e5e7eb;
       margin-top: 10px;
     }
+
+    .spark-container {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .spark {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: #facc15;
+      border-radius: 50%;
+      opacity: 0;
+      animation: sparkle 1s ease-out forwards;
+    }
+
+    @keyframes sparkle {
+      0% {
+        transform: translate(0,0) scale(0.5);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(var(--x), var(--y)) scale(1.5);
+        opacity: 0;
+      }
+    }
   </style>
 </head>
 <body>
 
+  <div id="checkoutPopup" style="position:fixed; inset:0; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index:3000;">
+    <div style="background:#0f172a; border:4px solid #facc15; border-radius:24px; padding:35px; width:420px; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,0.6);">
+      <h2 style="color:#facc15; margin-bottom:20px;">Checkout Summary</h2>
+      <div id="checkoutDetails" style="color:white; line-height:1.8; font-size:18px;"></div>
+      <button onclick="closeCheckoutPopup()" class="stop-btn" style="margin-top:20px;">Close</button>
+    </div>
+  </div>
+
+  <div id="beginMenu" style="position:fixed; inset:0; background:rgba(0,0,0,0.85); display:flex; justify-content:center; align-items:center; z-index:1000;">
+    <div style="background:#0f172a; padding:40px; border-radius:24px; text-align:center; width:400px; border:4px solid #facc15; box-shadow:0 20px 50px rgba(0,0,0,0.5);">
+      <h2 style="color:#facc15; margin-bottom:20px;">Choose Starting Player</h2>
+      <p style="color:white; margin-bottom:25px;">Select who will begin the slot machine game.</p>
+      <div style="display:flex; gap:15px; justify-content:center;">
+        <button onclick="startGame(1)" class="start-btn">Player 1</button>
+        <button onclick="startGame(2)" class="stop-btn">Player 2</button>
+      </div>
+    </div>
+  </div>
+
   <div class="slot-machine">
+    <div id="jackpotPopup" style="position:fixed; inset:0; background:rgba(0,0,0,0.75); display:none; justify-content:center; align-items:center; z-index:2000;">
+      <div style="background:#0f172a; border:4px solid #facc15; border-radius:24px; padding:40px 60px; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,0.5);">
+        <h2 style="font-size:48px; color:#facc15; margin-bottom:10px;">JACKPOT!!</h2>
+        <p style="color:white; font-size:20px;">100 Points Won</p>
+      </div>
+    </div>
+    <div class="spark-container" id="sparkContainer"></div>
     <h1>🎰 Slot Machine</h1>
 
     <div class="slots">
@@ -117,23 +171,67 @@
     </div>
 
     <div class="status" id="statusText">Press Start to Spin</div>
-    <div class="status" id="spinCount">Spins Used: 0</div>
-    <div class="status" id="totalPoints">Total Points Earned: 0 pts</div>
+    <div class="status" id="currentPlayer">Current Player: Player 1</div>
+    <div class="status" id="spinCount">Player 1 Spins Used: 0</div>
+    <div class="status" id="sessionInfo">Player switches after 10 spins</div>
+    <div class="status" id="totalPoints">Player 1 Total Points: 0 pts</div>
+    <div class="status" id="player2Spins">Player 2 Spins Used: 0</div>
+    <div class="status" id="player2Points">Player 2 Total Points: 0 pts</div>
+    <div class="status" id="cashValue">Player 1 Cash: CA$0 | Player 2 Cash: CA$0</div>
+    <div style="margin-top:15px;">
+      <button onclick="checkoutWinnings()" class="start-btn">Checkout</button>
+    </div>
   </div>
 
   <script>
+    function startGame(player) {
+      currentPlayer = player;
+      document.getElementById('currentPlayer').textContent = `Current Player: Player ${currentPlayer}`;
+      document.getElementById('beginMenu').style.display = 'none';
+    }
+
     const symbols = ['0','1','2','3','4','5','6','7','8','9'];
 
     let spinning = false;
     let spinInterval;
-    let playerScore = 0;
-    let spinsUsed = 0;
+    let player1Score = 0;
+    let player2Score = 0;
+    let player1Spins = 0;
+    let player2Spins = 0;
+    let currentPlayer = 1;
+
+    function createSparkEffect() {
+      const container = document.getElementById('sparkContainer');
+      const jackpotPopup = document.getElementById('jackpotPopup');
+
+      jackpotPopup.style.display = 'flex';
+
+      for (let i = 0; i < 25; i++) {
+        const spark = document.createElement('div');
+        spark.className = 'spark';
+        spark.style.left = '50%';
+        spark.style.top = '45%';
+        spark.style.setProperty('--x', `${Math.random() * 400 - 200}px`);
+        spark.style.setProperty('--y', `${Math.random() * 300 - 150}px`);
+        spark.style.animationDelay = `${Math.random() * 0.2}s`;
+        container.appendChild(spark);
+      }
+
+      setTimeout(() => {
+        container.innerHTML = '';
+        jackpotPopup.style.display = 'none';
+      }, 1200);
+    }
 
     function getRandomSymbol() {
       return symbols[Math.floor(Math.random() * symbols.length)];
     }
 
     function startSlots() {
+      if (spinning) return;
+
+      // Only allow current selected player to play
+      document.getElementById('statusText').textContent = `Player ${currentPlayer} is spinning...`;
       if (spinning) return;
 
       spinning = true;
@@ -143,7 +241,7 @@
         document.getElementById('slot1').textContent = getRandomSymbol();
         document.getElementById('slot2').textContent = getRandomSymbol();
         document.getElementById('slot3').textContent = getRandomSymbol();
-      }, 100);
+      }, 40);
     }
 
     function stopSlots() {
@@ -151,48 +249,98 @@
 
       clearInterval(spinInterval);
       spinning = false;
-      spinsUsed++;
+
+      if (currentPlayer === 1) {
+        player1Spins++;
+      } else {
+        player2Spins++;
+      }
 
       let slot1 = document.getElementById('slot1').textContent;
       let slot2 = document.getElementById('slot2').textContent;
       let slot3 = document.getElementById('slot3').textContent;
 
-      // Guarantee reward within 5 spins
-      if (spinsUsed === 5 && playerScore === 0) {
-        const rewardType = Math.random() < 0.5 ? 'double' : 'triple';
+      const activeSpins = currentPlayer === 1 ? player1Spins : player2Spins;
 
-        if (rewardType === 'triple') {
-          const forcedNumber = getRandomSymbol();
-          slot1 = slot2 = slot3 = forcedNumber;
-          document.getElementById('slot1').textContent = forcedNumber;
-          document.getElementById('slot2').textContent = forcedNumber;
-          document.getElementById('slot3').textContent = forcedNumber;
-        } else {
-          const forcedNumber = getRandomSymbol();
-          const differentNumber = getRandomSymbol();
+      // Force wins on 5th and 10th spin
+      if (activeSpins === 5 || activeSpins === 10) {
+        const forcedNumber = getRandomSymbol();
+        slot1 = slot2 = slot3 = forcedNumber;
 
-          slot1 = forcedNumber;
-          slot2 = forcedNumber;
-          slot3 = differentNumber;
-
-          document.getElementById('slot1').textContent = slot1;
-          document.getElementById('slot2').textContent = slot2;
-          document.getElementById('slot3').textContent = slot3;
-        }
+        document.getElementById('slot1').textContent = forcedNumber;
+        document.getElementById('slot2').textContent = forcedNumber;
+        document.getElementById('slot3').textContent = forcedNumber;
       }
 
       if (slot1 === slot2 && slot2 === slot3) {
-        playerScore += 100;
-        document.getElementById('statusText').textContent = '🎉 Jackpot! Player 1 earned 100 pts';
+        if (currentPlayer === 1) {
+          player1Score += 100;
+        } else {
+          player2Score += 100;
+        }
+
+        document.getElementById('statusText').textContent = `🎉 Player ${currentPlayer} earned 100 pts`;
+        createSparkEffect();
       } else if (slot1 === slot2 || slot1 === slot3 || slot2 === slot3) {
-        playerScore += 50;
-        document.getElementById('statusText').textContent = '✨ Match! Player 1 earned 50 pts';
+        if (currentPlayer === 1) {
+          player1Score += 50;
+        } else {
+          player2Score += 50;
+        }
+
+        document.getElementById('statusText').textContent = `✨ Player ${currentPlayer} earned 50 pts`;
       } else {
         document.getElementById('statusText').textContent = 'No Match — 0 pts';
       }
 
-      document.getElementById('spinCount').textContent = `Spins Used: ${spinsUsed}`;
-      document.getElementById('totalPoints').textContent = `Total Points Earned: ${playerScore} pts`;
+      document.getElementById('spinCount').textContent = `Player 1 Spins Used: ${player1Spins}`;
+      document.getElementById('totalPoints').textContent = `Player 1 Total Points: ${player1Score} pts`;
+      document.getElementById('player2Spins').textContent = `Player 2 Spins Used: ${player2Spins}`;
+      document.getElementById('player2Points').textContent = `Player 2 Total Points: ${player2Score} pts`;
+
+      // Switch to player 2 after player 1 reaches 10 spins
+      if (currentPlayer === 1 && player1Spins >= 10) {
+        currentPlayer = 2;
+        document.getElementById('currentPlayer').textContent = 'Current Player: Player 2';
+        document.getElementById('statusText').textContent = 'Switched to Player 2 after 10 spins';
+      }
+
+      const player1Cash = (player1Score / 100) * 10;
+      const player2Cash = (player2Score / 100) * 10;
+
+      document.getElementById('cashValue').textContent = `Player 1 Cash: CA$${player1Cash.toFixed(2)} | Player 2 Cash: CA$${player2Cash.toFixed(2)}`;
+
+      // End game summary after both players complete 10 spins
+      if (player1Spins >= 10 && player2Spins >= 10) {
+        setTimeout(() => {
+          alert(
+            `Game Over!
+
+Player 1 earned ${player1Score} pts = CA$${player1Cash.toFixed(2)}
+Player 2 earned ${player2Score} pts = CA$${player2Cash.toFixed(2)}`
+          );
+        }, 500);
+      }
+    }
+  function checkoutWinnings() {
+      const player1Cash = (player1Score / 100) * 10;
+      const player2Cash = (player2Score / 100) * 10;
+      const totalCash = player1Cash + player2Cash;
+
+      document.getElementById('checkoutDetails').innerHTML = `
+        <strong>Player 1 Gain</strong><br>
+        ${player1Score} pts = CA$${player1Cash.toFixed(2)}<br><br>
+        <strong>Player 2 Gain</strong><br>
+        ${player2Score} pts = CA$${player2Cash.toFixed(2)}<br><br>
+        <strong>Total Cash Out</strong><br>
+        CA$${totalCash.toFixed(2)}
+      `;
+
+      document.getElementById('checkoutPopup').style.display = 'flex';
+    }
+
+    function closeCheckoutPopup() {
+      document.getElementById('checkoutPopup').style.display = 'none';
     }
   </script>
 

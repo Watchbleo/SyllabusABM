@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<script>
+$(document).ready(function(){
+
+    $("#myInput").on("keyup", function(){
+
+        var value = $(this).val().toLowerCase();
+
+        $("#myTable tr").filter(function(){
+
+            $(this).toggle(
+                $(this).text().toLowerCase().indexOf(value) > -1
+            );
+
+        });
+
+    });
+
+});
+</script>
+
+<style>
+
+body{
+    font-family: Arial;
+    margin:20px;
+}
+
+#myInput{
+    width:300px;
+    padding:10px;
+    margin-bottom:15px;
+}
+
+table{
+    border-collapse:collapse;
+    width:100%;
+}
+
+th{
+    background:#2c3e50;
+    color:white;
+}
+
+td, th{
+    border:1px solid #ddd;
+    padding:10px;
+}
+
+tr:nth-child(even){
+    background:#f2f2f2;
+}
+
+</style>
+
+</head>
+<body>
+
+<h2>Nationality / Name / Profession Filter</h2>
+
+<p>
+Type a name, nationality, or profession:
+</p>
+
+<input
+    id="myInput"
+    type="text"
+    placeholder="Search Name, Nationality or Profession..."
+>
+
+<table>
+
+<thead>
+<tr>
+    <th>Name</th>
+    <th>Nationality</th>
+    <th>Profession</th>
+</tr>
+</thead>
+
+<tbody id="myTable">
+
+<tr>
+    <td>Lionel Messi</td>
+    <td>Argentina</td>
+    <td>Football Player</td>
+</tr>
+
+<tr>
+    <td>Elon Musk</td>
+    <td>South African</td>
+    <td>Entrepreneur</td>
+</tr>
+
+<tr>
+    <td>Taylor Swift</td>
+    <td>American</td>
+    <td>Singer</td>
+</tr>
+
+<tr>
+    <td>Cristiano Ronaldo</td>
+    <td>Portugal</td>
+    <td>Football Player</td>
+</tr>
+
+<tr>
+    <td>Sundar Pichai</td>
+    <td>Indian</td>
+    <td>CEO</td>
+</tr>
+
+<tr>
+    <td>Emma Watson</td>
+    <td>British</td>
+    <td>Actress</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</body>
+</html>

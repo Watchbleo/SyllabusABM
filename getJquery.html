@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<script>
+$(document).ready(function(){
+
+    $("button").click(function(){
+
+        $.get("demo_test.txt")
+
+        .done(function(data, status){
+
+            alert(
+                "Data:\n" + data +
+                "\n\nStatus: " + status
+            );
+
+            console.log("File Content:");
+            console.log(data);
+
+        })
+
+        .fail(function(xhr, status, error){
+
+            alert(
+                "Error Loading File\n" +
+                "Status: " + xhr.status +
+                "\nMessage: " + xhr.statusText
+            );
+
+        });
+
+    });
+
+});
+</script>
+</head>
+
+<body>
+
+<button>
+    Send an HTTP GET request to a page and get the result back
+</button>
+
+</body>
+</html>

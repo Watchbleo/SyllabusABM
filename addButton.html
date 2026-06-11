@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Employee Management System with Save & Undo</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <style>
+        body{
+            font-family:Arial, sans-serif;
+            background:#f4f6f9;
+            margin:20px;
+        }
+
+        h2{
+            color:#2c3e50;
+        }
+
+        button{
+            padding:10px 15px;
+            margin:5px;
+            border:none;
+            border-radius:5px;
+            color:white;
+            cursor:pointer;
+        }
+
+        #addBtn{
+            background:#27ae60;
+        }
+
+        #saveBtn{
+            background:#2980b9;
+        }
+
+        #undoBtn{
+            background:#f39c12;
+        }
+
+        .removeBtn{
+            background:#e74c3c;
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+            background:white;
+            margin-top:15px;
+        }
+
+        th{
+            background:#34495e;
+            color:white;
+        }
+
+        th,td{
+            border:1px solid #ddd;
+            padding:10px;
+            text-align:left;
+        }
+
+        input,select{
+            width:95%;
+            padding:5px;
+        }
+
+        .section{
+            margin-bottom:40px;
+        }
+    </style>
+
+    <script>
+    $(document).ready(function(){
+
+        // History Stack
+        let history = [];
+
+        // Add Employee Row
+        $("#addBtn").click(function(){
+
+            let row = $(`
+                <tr>
+                    <td>
+                        <input type="text" class="name">
+                    </td>
+
+                    <td>
+                        <select class="department">
+                            <option>IT</option>
+                            <option>HR</option>
+                            <option>Finance</option>
+                            <option>Marketing</option>
+                        </select>
+                    </td>
+
+                    <td>
+                        <select class="position">
+                            <option>Developer</option>
+                            <option>Manager</option>
+                            <option>Analyst</option>
+                            <option>Technician</option>
+                        </select>
+                    </td>
+
+                    <td>
+                        <input type="number" class="salary">
+                    </td>
+
+                    <td>
+                        <button class="removeBtn">
+                            Remove
+                        </button>
+                    </td>
+                </tr>
+            `);
+
+            $("#employeeTable tbody").append(row);
+
+            history.push({
+                action:"add",
+                row:row
+            });
+
+        });
+
+        // Remove Employee Row
+        $(document).on("click",".removeBtn",function(){
+
+            let row = $(this).closest("tr").detach();
+
+            history.push({
+                action:"delete",
+                row:row
+            });
+
+        });
+
+        // Save Employees
+        $("#saveBtn").click(function(){
+
+            let savedRows = [];
+
+            $("#employeeTable tbody tr").each(function(){
+
+                let name =
+                $(this).find(".name").val();
+
+                let department =
+                $(this).find(".department").val();
+
+                let position =
+                $(this).find(".position").val();
+
+                let salary =
+                $(this).find(".salary").val();
+
+                if(name.trim() !== ""){
+
+                    let savedRow = $(`
+                        <tr>
+                            <td>${name}</td>
+                            <td>${department}</td>
+                            <td>${position}</td>
+                            <td>${salary}</td>
+                        </tr>
+                    `);
+
+                    $("#savedTable tbody")
+                    .append(savedRow);
+
+                    savedRows.push(savedRow);
+                }
+
+            });
+
+            if(savedRows.length > 0){
+
+                history.push({
+                    action:"save",
+                    rows:savedRows
+                });
+
+                alert("Records Saved Successfully!");
+
+                console.log("Saved Records:");
+                console.table(
+                    savedRows.map(function(r){
+
+                        let td = r.find("td");
+
+                        return {
+                            Name: td.eq(0).text(),
+                            Department: td.eq(1).text(),
+                            Position: td.eq(2).text(),
+                            Salary: td.eq(3).text()
+                        };
+
+                    })
+                );
+            }
+            else{
+
+                alert("Please enter employee data first.");
+
+            }
+
+        });
+
+        // Undo Last Action
+        $("#undoBtn").click(function(){
+
+            if(history.length === 0){
+
+                alert("Nothing to Undo!");
+                return;
+            }
+
+            let last = history.pop();
+
+            switch(last.action){
+
+                case "add":
+
+                    last.row.remove();
+
+                    alert("Undo: Added row removed.");
+
+                    break;
+
+                case "delete":
+
+                    $("#employeeTable tbody")
+                    .append(last.row);
+
+                    alert("Undo: Deleted row restored.");
+
+                    break;
+
+                case "save":
+
+                    last.rows.forEach(function(row){
+
+                        row.remove();
+
+                    });
+
+                    alert("Undo: Saved records removed.");
+
+                    break;
+            }
+
+        });
+
+    });
+    </script>
+
+</head>
+
+<body>
+
+<div class="section">
+
+<h2>Employee Entry Table</h2>
+
+<button id="addBtn">
+Add Employee
+</button>
+
+<button id="saveBtn">
+Save Records
+</button>
+
+<button id="undoBtn">
+Undo Last Action
+</button>
+
+<table id="employeeTable">
+
+<thead>
+<tr>
+    <th>Name</th>
+    <th>Department</th>
+    <th>Position</th>
+    <th>Salary</th>
+    <th>Action</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+<input
+type="text"
+class="name"
+placeholder="Employee Name">
+</td>
+
+<td>
+<select class="department">
+    <option>IT</option>
+    <option>HR</option>
+    <option>Finance</option>
+    <option>Marketing</option>
+</select>
+</td>
+
+<td>
+<select class="position">
+    <option>Developer</option>
+    <option>Manager</option>
+    <option>Analyst</option>
+    <option>Technician</option>
+</select>
+</td>
+
+<td>
+<input
+type="number"
+class="salary"
+placeholder="Salary">
+</td>
+
+<td>
+<button class="removeBtn">
+Remove
+</button>
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<div class="section">
+
+<h2>Saved Employee Records</h2>
+
+<table id="savedTable">
+
+<thead>
+<tr>
+    <th>Name</th>
+    <th>Department</th>
+    <th>Position</th>
+    <th>Salary</th>
+</tr>
+</thead>
+
+<tbody>
+
+</tbody>
+
+</table>
+
+</div>
+
+</body>
+</html>

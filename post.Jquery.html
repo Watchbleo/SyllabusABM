@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<script>
+$(document).ready(function(){
+
+    $("#btnSend").click(function(){
+
+        $.post(
+            "demo_test_post.asp",
+            {
+                name: $("#txtName").val(),
+                city: $("#txtCity").val()
+            },
+            function(data, status){
+
+                alert("Status: " + status);
+                $("#result").html(data);
+
+                console.log(data);
+
+            }
+        );
+
+    });
+
+});
+</script>
+</head>
+<body>
+
+Name:
+<input type="text" id="txtName">
+<br><br>
+
+City:
+<input type="text" id="txtCity">
+<br><br>
+
+<button id="btnSend">Send Data</button>
+
+<hr>
+
+<div id="result"></div>
+
+</body>
+</html>

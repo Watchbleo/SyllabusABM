@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Information to JSON</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <style>
+
+    body{
+        font-family:Arial;
+        background:#f4f4f4;
+        padding:20px;
+    }
+
+    .container{
+        width:500px;
+        background:white;
+        padding:20px;
+        border-radius:10px;
+        box-shadow:0px 0px 10px lightgray;
+    }
+
+    label{
+        font-weight:bold;
+    }
+
+    input[type=text],
+    input[type=number]{
+        width:95%;
+        padding:8px;
+        margin-bottom:10px;
+    }
+
+    button{
+        background:#3498db;
+        color:white;
+        border:none;
+        padding:10px 15px;
+        cursor:pointer;
+        border-radius:5px;
+    }
+
+    button:hover{
+        background:#2980b9;
+    }
+
+    pre{
+        background:#272822;
+        color:#00ff00;
+        padding:10px;
+        margin-top:20px;
+        overflow:auto;
+    }
+
+    </style>
+
+    <script>
+
+    $(document).ready(function(){
+
+        $("#btnSave").click(function(){
+
+            let education = [];
+
+            $(".education:checked").each(function(){
+
+                education.push($(this).val());
+
+            });
+
+            let person = {
+
+                Name: $("#txtName").val(),
+
+                Gender:
+                $("input[name='gender']:checked").val(),
+
+                Age: $("#txtAge").val(),
+
+                Education: education
+
+            };
+
+            let jsonData =
+            JSON.stringify(person, null, 4);
+
+            console.clear();
+
+            console.log("JSON Object:");
+            console.log(person);
+
+            console.log("JSON String:");
+            console.log(jsonData);
+
+            $("#result").text(jsonData);
+
+        });
+
+    });
+
+    </script>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Student Information Form</h2>
+
+<label>Name</label>
+<br>
+
+<input
+type="text"
+id="txtName"
+placeholder="Enter Name">
+
+<br>
+
+<label>Gender</label>
+<br>
+
+<input
+type="radio"
+name="gender"
+value="Male">
+Male
+
+<input
+type="radio"
+name="gender"
+value="Female">
+Female
+
+<br><br>
+
+<label>Age</label>
+<br>
+
+<input
+type="number"
+id="txtAge"
+placeholder="Enter Age">
+
+<br>
+
+<label>Education</label>
+<br>
+
+<input
+type="checkbox"
+class="education"
+value="High School">
+High School
+
+<br>
+
+<input
+type="checkbox"
+class="education"
+value="College">
+College
+
+<br>
+
+<input
+type="checkbox"
+class="education"
+value="Bachelor">
+Bachelor
+
+<br>
+
+<input
+type="checkbox"
+class="education"
+value="Master">
+Master
+
+<br>
+
+<input
+type="checkbox"
+class="education"
+value="PhD">
+PhD
+
+<br><br>
+
+<button id="btnSave">
+Convert To JSON
+</button>
+
+<pre id="result"></pre>
+
+</div>
+
+</body>
+</html>
